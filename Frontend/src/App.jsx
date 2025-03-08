@@ -1,35 +1,87 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect, useState } from "react";
+import axios from "axios";
+import Editor from "react-simple-code-editor";
+import "prismjs/themes/prism-tomorrow.css";
+import prism from "prismjs";
+import Markdown from "react-markdown";
+import rehypeHighlight from "rehype-highlight";
+import "highlight.js/styles/github-dark.css";
+import "./App.css"
+
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [code, setCode] = useState("")
+  const [review, setReview] = useState(``)
+  const [isloading, setIsLoading] = useState(false)
+
+  async function getReview() {
+    try {
+      setIsLoading(true);
+      const response = await axios.post("http://localhost:8001/ai/get-review",{code})
+      setReview(response.data)
+      // console.log(response.data)
+    } catch (error) {
+      console.log("Error in fetching data", error);
+    } finally {
+      setIsLoading(false)
+    }  
+  }
+
+  const placeholderStyle = {
+    position: 'absolute',
+    top: '10px',
+    left: '10px',
+    color: '#999',
+    pointerEvents: 'none',
+    display: code ? 'none' : 'block'
+  };
+
+  useEffect(() => {
+    prism.highlightAll();
+  })
+
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <main>
+        <div className="left">
+          <div className="code">
+          <div style={placeholderStyle}>Enter You Code</div>
+            <Editor
+              value={code}
+              onValueChange={(code) => setCode(code)}
+              highlight={(code) =>
+                prism.highlight(code, prism.languages.javascript, "javascript")
+              }
+              padding={10}
+              style={{
+                fontFamily: '"Fira Mono", "Fira code", monospace',
+                fontSize: 16,
+                border: "1px solid #ddd",
+                borderRadius: "5px",
+                height: "100%",
+                width: "100%",
+              }}
+            ></Editor>
+          </div>
+            <div onClick={getReview} className="review">
+              Review
+            </div>
+          </div>
+        <div className="right">
+          {isloading ? (
+            <div className="loader"></div>
+          ) : (
+            <Markdown 
+            rehypePlugins={[rehypeHighlight]}
+            >
+              {review}
+            </Markdown>
+          )}
+        </div>
+      </main>
     </>
   )
 }
 
-export default App
+export default App;
