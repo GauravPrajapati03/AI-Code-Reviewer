@@ -6,47 +6,48 @@ import prism from "prismjs";
 import Markdown from "react-markdown";
 import rehypeHighlight from "rehype-highlight";
 import "highlight.js/styles/github-dark.css";
-import "./App.css"
-
+import "./App.css";
 
 function App() {
-  const [code, setCode] = useState("")
-  const [review, setReview] = useState(``)
-  const [isloading, setIsLoading] = useState(false)
+  const [code, setCode] = useState("");
+  const [review, setReview] = useState(``);
+  const [isloading, setIsLoading] = useState(false);
 
   async function getReview() {
     try {
       setIsLoading(true);
-      const response = await axios.post("http://localhost:8001/ai/get-review",{code})
-      setReview(response.data)
+      const response = await axios.post(
+        `${import.meta.env.VITE_REACT_APP_BACKEND_BASE_URL}/ai/get-review`,
+        { code }
+      );
+      setReview(response.data);
       // console.log(response.data)
     } catch (error) {
       console.log("Error in fetching data", error);
     } finally {
-      setIsLoading(false)
-    }  
+      setIsLoading(false);
+    }
   }
 
   const placeholderStyle = {
-    position: 'absolute',
-    top: '10px',
-    left: '10px',
-    color: '#999',
-    pointerEvents: 'none',
-    display: code ? 'none' : 'block'
+    position: "absolute",
+    top: "10px",
+    left: "10px",
+    color: "#999",
+    pointerEvents: "none",
+    display: code ? "none" : "block",
   };
 
   useEffect(() => {
     prism.highlightAll();
-  })
-
+  });
 
   return (
     <>
       <main>
         <div className="left">
           <div className="code">
-          <div style={placeholderStyle}>Enter You Code</div>
+            <div style={placeholderStyle}>Enter You Code</div>
             <Editor
               value={code}
               onValueChange={(code) => setCode(code)}
@@ -64,24 +65,20 @@ function App() {
               }}
             ></Editor>
           </div>
-            <div onClick={getReview} className="review">
-              Review
-            </div>
+          <div onClick={getReview} className="review">
+            Review
           </div>
+        </div>
         <div className="right">
           {isloading ? (
             <div className="loader"></div>
           ) : (
-            <Markdown 
-            rehypePlugins={[rehypeHighlight]}
-            >
-              {review}
-            </Markdown>
+            <Markdown rehypePlugins={[rehypeHighlight]}>{review}</Markdown>
           )}
         </div>
       </main>
     </>
-  )
+  );
 }
 
 export default App;
