@@ -62,6 +62,7 @@ function App() {
                 borderRadius: "5px",
                 height: "100%",
                 width: "100%",
+                color: "#d2e9b8",
               }}
             ></Editor>
           </div>
